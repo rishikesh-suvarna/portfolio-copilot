@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import threading
+import time
 from ctypes import cast
 from typing import Any, Dict, List, Optional, Set, cast
 
@@ -95,5 +96,6 @@ class TickerBridge:
         kws_any.on_close = on_close
 
         # threaded connect so this thread can manage callbacks
-        kws.connect(threaded=False)
-        kws.connect(threaded=False)
+        kws.connect(threaded=True)
+        while True:
+            time.sleep(1)
