@@ -1,0 +1,35 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# ===== Virtual environments =====
+.venv/
+venv/
+ENV/
+env/
+
+# ===== Environment variables / secrets =====
+.env
+.env.*
+!.env.example
+sample/
+
+# ===== FastAPI / Uvicorn =====
+*.log
+uvicorn.log
+
+# ===== IDEs =====
+.vscode/
+.idea/
+*.iml
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
