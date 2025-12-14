@@ -1,8 +1,10 @@
 from typing import Any, Dict, cast
 
 from app.core.config import settings
+from app.kite.client import get_kite
 from app.schemas.auth import ExchangeRequest
 from app.services.session_store import store
+from app.services.token_file_store import save_token
 from fastapi import APIRouter, HTTPException
 from kiteconnect import KiteConnect
 
@@ -23,6 +25,7 @@ def exchange(req: ExchangeRequest):
         data = cast(Dict[str, Any], raw)
         access_token = data["access_token"]
         store.set(access_token)
+        save_token(access_token)
         return {
             "ok": True,
             "access_token_set": True,
@@ -37,3 +40,8 @@ def exchange(req: ExchangeRequest):
 def logout():
     store.clear()
     return {"ok": True}
+
+@router.get("/me")
+def me():
+    kite = get_kite()
+    return kite.profile()

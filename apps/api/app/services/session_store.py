@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Optional
 
+from app.services.token_file_store import load_token
+
 
 @dataclass
 class KiteSession:
@@ -42,3 +44,6 @@ class InMemorySessionStore:
 
 
 store = InMemorySessionStore()
+t = load_token()
+if t:
+    store.set(t)
