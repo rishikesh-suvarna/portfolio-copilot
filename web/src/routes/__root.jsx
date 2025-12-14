@@ -1,4 +1,4 @@
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Link, Outlet } from '@tanstack/react-router';
 
 export const Route = createRootRoute({
   component: Root,
@@ -19,8 +19,8 @@ function Root() {
             <Link to="/stream" className="[&.active]:font-semibold">
               Stream
             </Link>
-            <Link to="/auth/kite/callback" className="[&.active]:font-semibold">
-              Auth Callback
+            <Link to="/login" className="[&.active]:font-semibold">
+              Login
             </Link>
           </nav>
         </div>

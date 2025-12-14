@@ -1,60 +1,66 @@
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { apiGet } from "../api/client";
-import { createWs } from "../lib/ws";
+import { useQuery } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { apiGet } from '../api/client';
+import { createWs, safeSend } from '../lib/ws';
 
-export const Route = createFileRoute("/stream")({
+export const Route = createFileRoute('/stream')({
   component: Stream,
 });
 
 function Stream() {
   const [events, setEvents] = useState([]);
   const wsRef = useRef(null);
+  const pendingSubRef = useRef(null);
 
   const holdingsQ = useQuery({
-    queryKey: ["holdings"],
-    queryFn: () => apiGet("/api/portfolio/holdings"),
+    queryKey: ['holdings'],
+    queryFn: () => apiGet('/api/portfolio/holdings'),
   });
 
+  const tokens = useMemo(() => {
+    const hs = Array.isArray(holdingsQ.data) ? holdingsQ.data : [];
+    return hs.map((h) => h.instrument_token).filter((t) => typeof t === 'number');
+  }, [holdingsQ.data]);
+
   useEffect(() => {
-    const ws = createWs("/ws/stream");
+    const ws = createWs('/ws/stream', {
+      onOpen: (sock) => {
+        wsRef.current = sock;
+        if (pendingSubRef.current) {
+          safeSend(sock, pendingSubRef.current);
+          pendingSubRef.current = null;
+        }
+      },
+      onMessage: (ev) => {
+        const msg = JSON.parse(ev.data);
+        setEvents((prev) => [msg, ...prev].slice(0, 50));
+      },
+    });
+
     wsRef.current = ws;
-
-    ws.onmessage = (ev) => {
-      const msg = JSON.parse(ev.data);
-      setEvents((prev) => [msg, ...prev].slice(0, 50));
-    };
-
     return () => ws.close();
   }, []);
 
-  function subscribeFromHoldings() {
-    const hs = Array.isArray(holdingsQ.data) ? holdingsQ.data : [];
-    const tokens = hs.map((h) => h.instrument_token).filter((t) => typeof t === "number");
+  function subscribe() {
+    const payload = JSON.stringify({ type: 'SUBSCRIBE', tokens, mode: 'full' });
 
-    wsRef.current?.send(
-      JSON.stringify({
-        type: "SUBSCRIBE",
-        tokens,
-        mode: "full",
-      })
-    );
+    if (!safeSend(wsRef.current, payload)) {
+      pendingSubRef.current = payload; // will send on open
+    }
   }
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">Realtime Stream</h1>
 
-      <div className="flex gap-2">
-        <button
-          onClick={subscribeFromHoldings}
-          className="rounded-lg border px-3 py-2 text-sm hover:bg-neutral-50"
-          disabled={holdingsQ.isLoading || !wsRef.current}
-        >
-          Subscribe holdings
-        </button>
-      </div>
+      <button
+        onClick={subscribe}
+        className="rounded-lg border px-3 py-2 text-sm hover:bg-neutral-50"
+        disabled={!tokens.length}
+      >
+        Subscribe holdings
+      </button>
 
       <div className="rounded-xl border bg-neutral-50 p-3 text-xs overflow-auto h-[60vh]">
         {events.map((e, i) => (

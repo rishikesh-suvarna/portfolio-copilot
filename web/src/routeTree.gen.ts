@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StreamRouteImport } from './routes/stream'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as HoldingsRouteImport } from './routes/holdings'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthKiteCallbackRouteImport } from './routes/auth.kite.callback'
@@ -17,6 +18,11 @@ import { Route as AuthKiteCallbackRouteImport } from './routes/auth.kite.callbac
 const StreamRoute = StreamRouteImport.update({
   id: '/stream',
   path: '/stream',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HoldingsRoute = HoldingsRouteImport.update({
@@ -38,12 +44,14 @@ const AuthKiteCallbackRoute = AuthKiteCallbackRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/holdings': typeof HoldingsRoute
+  '/login': typeof LoginRoute
   '/stream': typeof StreamRoute
   '/auth/kite/callback': typeof AuthKiteCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/holdings': typeof HoldingsRoute
+  '/login': typeof LoginRoute
   '/stream': typeof StreamRoute
   '/auth/kite/callback': typeof AuthKiteCallbackRoute
 }
@@ -51,20 +59,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/holdings': typeof HoldingsRoute
+  '/login': typeof LoginRoute
   '/stream': typeof StreamRoute
   '/auth/kite/callback': typeof AuthKiteCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/holdings' | '/stream' | '/auth/kite/callback'
+  fullPaths: '/' | '/holdings' | '/login' | '/stream' | '/auth/kite/callback'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/holdings' | '/stream' | '/auth/kite/callback'
-  id: '__root__' | '/' | '/holdings' | '/stream' | '/auth/kite/callback'
+  to: '/' | '/holdings' | '/login' | '/stream' | '/auth/kite/callback'
+  id:
+    | '__root__'
+    | '/'
+    | '/holdings'
+    | '/login'
+    | '/stream'
+    | '/auth/kite/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HoldingsRoute: typeof HoldingsRoute
+  LoginRoute: typeof LoginRoute
   StreamRoute: typeof StreamRoute
   AuthKiteCallbackRoute: typeof AuthKiteCallbackRoute
 }
@@ -76,6 +92,13 @@ declare module '@tanstack/react-router' {
       path: '/stream'
       fullPath: '/stream'
       preLoaderRoute: typeof StreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/holdings': {
@@ -105,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HoldingsRoute: HoldingsRoute,
+  LoginRoute: LoginRoute,
   StreamRoute: StreamRoute,
   AuthKiteCallbackRoute: AuthKiteCallbackRoute,
 }
