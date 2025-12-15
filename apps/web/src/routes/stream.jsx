@@ -74,9 +74,7 @@ function Stream() {
     <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-800 bg-clip-text text-transparent">
-            Real-time Stream
-          </h1>
+          <h1 className="text-3xl font-bold text-slate-900">Real-time Stream</h1>
           <p className="text-slate-600 mt-1">Live market data for your holdings</p>
         </div>
 
@@ -116,7 +114,7 @@ function Stream() {
               <button
                 onClick={subscribe}
                 disabled={!tokens.length || !isConnected}
-                className="px-5 py-2.5 rounded-xl bg-slate-800 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-lg flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-lg flex items-center gap-2"
               >
                 <svg
                   className="w-4 h-4"
@@ -172,11 +170,11 @@ function Stream() {
         {isSubscribed && events.length > 0 && (
           <div className="mt-4 pt-4 border-t border-slate-200">
             <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="p-3 rounded-xl bg-blue-50">
+              <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
                 <p className="text-2xl font-bold text-blue-600">{events.length}</p>
                 <p className="text-xs text-blue-700 font-medium mt-1">Total Events</p>
               </div>
-              <div className="p-3 rounded-xl bg-indigo-50">
+              <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100">
                 <p className="text-2xl font-bold text-indigo-600">
                   {events[0]
                     ? new Date(events[0].timestamp).toLocaleTimeString()
@@ -184,7 +182,7 @@ function Stream() {
                 </p>
                 <p className="text-xs text-indigo-700 font-medium mt-1">Last Update</p>
               </div>
-              <div className="p-3 rounded-xl bg-violet-50">
+              <div className="p-3 rounded-xl bg-violet-50 border border-violet-100">
                 <p className="text-2xl font-bold text-violet-600">{tokens.length}</p>
                 <p className="text-xs text-violet-700 font-medium mt-1">
                   Active Streams
@@ -258,7 +256,7 @@ function Stream() {
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
                       <svg
                         className="w-4 h-4 text-white"
                         fill="none"
