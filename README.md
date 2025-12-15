@@ -27,18 +27,20 @@ The goal of this project is:
 
 ## Project Structure
 
+```plaintext
 portfolio-copilot/
 ├── apps/
-│ ├── api/ # FastAPI backend
-│ │ ├── app/
-│ │ │ ├── core/
-│ │ │ ├── kite/
-│ │ │ ├── routes/
-│ │ │ └── services/
-│ │ └── .venv/
-│ └── web/ # React + Vite frontend
-│ │ └── src/
+│   ├── api/            # FastAPI backend
+│   │   ├── app/
+│   │   │   ├── core/
+│   │   │   ├── kite/
+│   │   │   ├── routes/
+│   │   │   └── services/
+│   │   └── .venv/
+│   └── web/            # React + Vite frontend
+│       └── src/
 └── README.md
+```
 
 ---
 
