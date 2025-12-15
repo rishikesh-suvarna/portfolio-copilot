@@ -26,6 +26,9 @@ class TickerBridge:
         self._mode: str = "full"  # "ltp" | "quote" | "full"
 
         self._lock = threading.Lock()
+        self._connected: bool = False
+        self._last_applied: Set[int] = set()
+
 
     @property
     def queue(self) -> "asyncio.Queue[Dict[str, Any]]":
@@ -40,17 +43,19 @@ class TickerBridge:
             self._thread.start()
 
     def update_subscription(self, tokens: List[int], mode: str = "full") -> None:
+        # sanitize tokens to ints
+        tokens = [int(t) for t in tokens if isinstance(t, int) or (isinstance(t, str) and t.isdigit())]
+
         with self._lock:
             self._subscribed = set(tokens)
             self._mode = mode
-            if self._kws:
-                self._kws.subscribe(tokens)
-                if mode == "ltp":
-                    self._kws.set_mode(self._kws.MODE_LTP, tokens)
-                elif mode == "quote":
-                    self._kws.set_mode(self._kws.MODE_QUOTE, tokens)
-                else:
-                    self._kws.set_mode(self._kws.MODE_FULL, tokens)
+
+            # Only apply immediately if Kite WS is connected
+            if not self._kws or not self._connected:
+                return
+
+            self._apply_subscription_locked()
+
 
     def _emit(self, payload: Dict[str, Any]) -> None:
         if not self._loop:
@@ -69,25 +74,22 @@ class TickerBridge:
 
         def on_connect(ws, response):
             with self._lock:
-                tokens = list(self._subscribed)
-                mode = self._mode
-            if tokens:
-                ws.subscribe(tokens)
-                if mode == "ltp":
-                    ws.set_mode(ws.MODE_LTP, tokens)
-                elif mode == "quote":
-                    ws.set_mode(ws.MODE_QUOTE, tokens)
-                else:
-                    ws.set_mode(ws.MODE_FULL, tokens)
+                self._connected = True
+                self._apply_subscription_locked()
             self._emit({"type": "CONNECTED"})
+
 
         def on_ticks(ws, ticks):
             self._emit({"type": "TICKS", "data": ticks})
 
         def on_error(ws, code, reason):
+            with self._lock:
+                self._connected = False
             self._emit({"type": "ERROR", "code": code, "reason": reason})
 
         def on_close(ws, code, reason):
+            with self._lock:
+                self._connected = False
             self._emit({"type": "CLOSED", "code": code, "reason": reason})
 
         kws_any.on_connect = on_connect
@@ -99,3 +101,29 @@ class TickerBridge:
         kws.connect(threaded=True)
         while True:
             time.sleep(1)
+
+    def _apply_subscription_locked(self) -> None:
+        assert self._kws is not None
+
+        tokens = list(self._subscribed)
+        mode = self._mode
+
+        # unsubscribe tokens that are no longer needed
+        to_remove = list(self._last_applied - self._subscribed)
+        if to_remove:
+            try:
+                self._kws.unsubscribe(to_remove)
+            except Exception:
+                pass
+
+        # subscribe new tokens
+        if tokens:
+            self._kws.subscribe(tokens)
+            if mode == "ltp":
+                self._kws.set_mode(self._kws.MODE_LTP, tokens)
+            elif mode == "quote":
+                self._kws.set_mode(self._kws.MODE_QUOTE, tokens)
+            else:
+                self._kws.set_mode(self._kws.MODE_FULL, tokens)
+
+        self._last_applied = set(tokens)
